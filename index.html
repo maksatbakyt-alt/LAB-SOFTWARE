@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMS – Inventory Management System</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600;700&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161923;
+    --border: #242836;
+    --accent: #00e5a0;
+    --accent2: #ff6b6b;
+    --accent3: #ffc94a;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --card-bg: #1a1f2e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── LOGIN PAGE ── */
+  #loginPage {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 30% 50%, #0d2a1f 0%, var(--bg) 70%);
+  }
+
+  .login-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 40px;
+    width: 380px;
+    box-shadow: 0 0 80px rgba(0,229,160,0.07);
+  }
+
+  .login-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .login-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 32px;
+    color: var(--text);
+  }
+
+  .form-label { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; }
+
+  .form-control {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    transition: border-color 0.2s;
+  }
+  .form-control:focus { background: var(--bg); color: var(--text); border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,229,160,0.12); }
+
+  .btn-login {
+    background: var(--accent);
+    color: #000;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 11px;
+    width: 100%;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn-login:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .login-hint { font-size: 12px; color: var(--muted); margin-top: 16px; text-align: center; }
+  .login-hint span { color: var(--accent); font-family: 'DM Mono', monospace; }
+
+  .alert-danger-custom {
+    background: rgba(255,107,107,0.1);
+    border: 1px solid rgba(255,107,107,0.3);
+    color: var(--accent2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-top: 12px;
+  }
+
+  /* ── LAYOUT ── */
+  #app { display: none; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 220px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 0;
+    z-index: 100;
+  }
+
+  .sidebar-brand {
+    padding: 0 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand-tag { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; }
+  .brand-name { font-size: 18px; font-weight: 700; color: var(--text); margin-top: 2px; }
+
+  .sidebar-nav { flex: 1; padding: 20px 12px; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .nav-item:hover { background: var(--border); color: var(--text); }
+  .nav-item.active { background: rgba(0,229,160,0.12); color: var(--accent); }
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .user-info { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .user-name { font-weight: 600; color: var(--text); }
+  .user-role { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; }
+
+  .btn-logout {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.15s;
+  }
+  .btn-logout:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* MAIN */
+  .main-content {
+    margin-left: 220px;
+    padding: 32px;
+    min-height: 100vh;
+  }
+
+  /* PAGE */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* PAGE HEADER */
+  .page-header { margin-bottom: 28px; }
+  .page-title { font-size: 24px; font-weight: 700; }
+  .page-sub { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+  /* STAT CARDS */
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+  }
+  .stat-label { font-size: 11px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; font-weight: 600; }
+  .stat-value { font-size: 32px; font-weight: 700; font-family: 'DM Mono', monospace; margin: 6px 0 2px; }
+  .stat-value.green { color: var(--accent); }
+  .stat-value.red { color: var(--accent2); }
+  .stat-value.yellow { color: var(--accent3); }
+  .stat-desc { font-size: 12px; color: var(--muted); }
+
+  /* CHART CARD */
+  .chart-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .chart-title { font-size: 14px; font-weight: 600; margin-bottom: 20px; color: var(--text); }
+
+  /* TABLE */
+  .table-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .table-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .table-title { font-size: 14px; font-weight: 600; }
+
+  .search-input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    width: 220px;
+    font-family: 'Sora', sans-serif;
+  }
+  .search-input:focus { outline: none; border-color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.1s; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  tbody tr.low-stock { background: rgba(255,107,107,0.05); }
+  tbody tr.low-stock:hover { background: rgba(255,107,107,0.08); }
+  tbody td { padding: 12px 16px; font-size: 13px; }
+
+  .badge-cat {
+    display: inline-block;
+    background: rgba(0,229,160,0.1);
+    color: var(--accent);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.04em;
+  }
+  .badge-low {
+    display: inline-block;
+    background: rgba(255,107,107,0.15);
+    color: var(--accent2);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .badge-ok {
+    display: inline-block;
+    background: rgba(0,229,160,0.1);
+    color: var(--accent);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+  }
+
+  /* BUTTONS */
+  .btn-primary-custom {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Sora', sans-serif;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+  .btn-primary-custom:hover { opacity: 0.85; }
+
+  .btn-edit {
+    background: rgba(255,201,74,0.12);
+    color: var(--accent3);
+    border: none;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Sora', sans-serif;
+    transition: background 0.15s;
+  }
+  .btn-edit:hover { background: rgba(255,201,74,0.22); }
+
+  .btn-delete {
+    background: rgba(255,107,107,0.12);
+    color: var(--accent2);
+    border: none;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Sora', sans-serif;
+    transition: background 0.15s;
+  }
+  .btn-delete:hover { background: rgba(255,107,107,0.22); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+
+  .modal-box {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    width: 440px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 24px; }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+  .btn-cancel {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Sora', sans-serif;
+  }
+  .btn-cancel:hover { border-color: var(--muted); color: var(--text); }
+
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+  .form-group input, .form-group select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); }
+  .form-group select option { background: var(--surface); }
+  .field-error { color: var(--accent2); font-size: 11px; margin-top: 4px; }
+
+  /* ALERTS PAGE */
+  .alert-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255,107,107,0.06);
+    border: 1px solid rgba(255,107,107,0.2);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+  }
+  .alert-icon { font-size: 20px; }
+  .alert-product { font-weight: 600; font-size: 14px; }
+  .alert-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .alert-time { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-left: auto; white-space: nowrap; }
+  .btn-resolve {
+    background: rgba(0,229,160,0.12);
+    color: var(--accent);
+    border: none;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Sora', sans-serif;
+    white-space: nowrap;
+  }
+  .btn-resolve:hover { background: rgba(0,229,160,0.22); }
+
+  .empty-state { text-align: center; padding: 48px; color: var(--muted); }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-text { font-size: 14px; }
+
+  /* TOAST */
+  .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 999; }
+  .toast-msg {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 13px;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    animation: slideIn 0.3s ease;
+  }
+  .toast-msg.success { border-color: rgba(0,229,160,0.4); }
+  .toast-msg.error { border-color: rgba(255,107,107,0.4); }
+  @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  /* ACCESS DENIED */
+  .access-denied {
+    text-align: center;
+    padding: 80px 32px;
+    color: var(--accent2);
+  }
+  .access-denied .icon { font-size: 64px; margin-bottom: 16px; }
+
+  /* ROLE BADGE in header */
+  .role-pill {
+    display: inline-block;
+    background: rgba(0,229,160,0.12);
+    color: var(--accent);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-left: 10px;
+    vertical-align: middle;
+  }
+  .role-pill.employee { background: rgba(255,201,74,0.12); color: var(--accent3); }
+</style>
+</head>
+<body>
+
+<div id="loginPage">
+  <div class="login-card">
+    <div class="login-logo">IMS v1.0</div>
+    <div class="login-title">Sign In</div>
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <input class="form-control" id="loginUser" type="text" placeholder="Enter username" autocomplete="off">
+    </div>
+    <div class="form-group" style="margin-top:16px">
+      <label class="form-label">Password</label>
+      <input class="form-control" id="loginPass" type="password" placeholder="Enter password">
+    </div>
+    <div id="loginError" class="alert-danger-custom" style="display:none"></div>
+    <button class="btn-login" style="margin-top:24px" onclick="doLogin()">Sign In</button>
+    <div class="login-hint">
+      Admin: <span>admin / admin123</span> &nbsp;|&nbsp; Employee: <span>employee / emp123</span>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-tag">CMPE314</div>
+      <div class="brand-name">IMS</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
+        <span class="icon">📊</span> Dashboard
+      </a>
+      <a class="nav-item" onclick="showPage('inventory')" id="nav-inventory">
+        <span class="icon">📦</span> Inventory
+      </a>
+      <a class="nav-item" onclick="showPage('suppliers')" id="nav-suppliers">
+        <span class="icon">🏭</span> Suppliers
+      </a>
+      <a class="nav-item" onclick="showPage('alerts')" id="nav-alerts">
+        <span class="icon">🔔</span> Alerts <span id="alertBadge" style="display:none;background:var(--accent2);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px"></span>
+      </a>
+      <a class="nav-item" onclick="showPage('admin')" id="nav-admin">
+        <span class="icon">⚙️</span> Admin Panel
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">Signed in as</div>
+      <div class="user-name" id="sidebarUsername"></div>
+      <div class="user-role" id="sidebarRole"></div>
+      <button class="btn-logout" style="margin-top:12px" onclick="doLogout()">Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div class="page-title">Dashboard <span class="role-pill" id="dashRolePill"></span></div>
+        <div class="page-sub">Real-time inventory overview</div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <div class="stat-card">
+            <div class="stat-label">Total Products</div>
+            <div class="stat-value green" id="statTotal">0</div>
+            <div class="stat-desc">items in inventory</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="stat-card">
+            <div class="stat-label">Low Stock Items</div>
+            <div class="stat-value red" id="statLow">0</div>
+            <div class="stat-desc">below threshold</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="stat-card">
+            <div class="stat-label">Total Suppliers</div>
+            <div class="stat-value yellow" id="statSuppliers">0</div>
+            <div class="stat-desc">registered contacts</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div class="chart-card">
+            <div class="chart-title">Stock Levels by Product</div>
+            <canvas id="stockChart" height="200"></canvas>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="chart-card" style="height:100%">
+            <div class="chart-title">Stock Status</div>
+            <canvas id="donutChart" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-inventory">
+      <div class="page-header d-flex justify-content-between align-items-start">
+        <div>
+          <div class="page-title">Inventory</div>
+          <div class="page-sub">Manage your products</div>
+        </div>
+        <button class="btn-primary-custom" onclick="openAddProduct()" id="btnAddProduct">＋ Add Product</button>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">All Products</div>
+          <input class="search-input" type="text" id="searchInput" placeholder="Search by name or category…" oninput="renderInventoryTable()">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Product Name</th>
+              <th>Category</th>
+              <th>Quantity</th>
+              <th>Threshold</th>
+              <th>Status</th>
+              <th>Supplier</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="page" id="page-suppliers">
+      <div class="page-header d-flex justify-content-between align-items-start">
+        <div>
+          <div class="page-title">Suppliers</div>
+          <div class="page-sub">Manage supplier contacts</div>
+        </div>
+        <button class="btn-primary-custom" onclick="openAddSupplier()" id="btnAddSupplier">＋ Add Supplier</button>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">All Suppliers</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Supplier Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Products</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="suppliersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="page" id="page-alerts">
+      <div class="page-header">
+        <div class="page-title">Low Stock Alerts</div>
+        <div class="page-sub">Items requiring attention</div>
+      </div>
+      <div id="alertsList"></div>
+    </div>
+
+    <div class="page" id="page-admin">
+      <div class="page-header">
+        <div class="page-title">Admin Panel</div>
+        <div class="page-sub">User management (Admin only)</div>
+      </div>
+      <div id="adminContent"></div>
+    </div>
+
+  </main>
+</div>
+
+<div class="modal-overlay" id="productModal">
+  <div class="modal-box">
+    <div class="modal-title" id="productModalTitle">Add Product</div>
+    <input type="hidden" id="editProductId">
+    <div class="form-group">
+      <label>Product Name</label>
+      <input type="text" id="pName" placeholder="e.g. Basmati Rice">
+      <div class="field-error" id="pNameErr"></div>
+    </div>
+    <div class="form-group">
+      <label>Category</label>
+      <select id="pCategory">
+        <option value="">Select category</option>
+        <option>Grains & Cereals</option>
+        <option>Dairy</option>
+        <option>Beverages</option>
+        <option>Snacks</option>
+        <option>Cleaning</option>
+        <option>Electronics</option>
+        <option>Other</option>
+      </select>
+      <div class="field-error" id="pCatErr"></div>
+    </div>
+    <div class="form-group">
+      <label>Quantity</label>
+      <input type="number" id="pQty" placeholder="0" min="0">
+      <div class="field-error" id="pQtyErr"></div>
+    </div>
+    <div class="form-group">
+      <label>Low-Stock Threshold</label>
+      <input type="number" id="pThreshold" placeholder="10" min="1">
+      <div class="field-error" id="pThreshErr"></div>
+    </div>
+    <div class="form-group">
+      <label>Supplier</label>
+      <select id="pSupplier">
+        <option value="">No supplier assigned</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('productModal')">Cancel</button>
+      <button class="btn-primary-custom" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="supplierModal">
+  <div class="modal-box">
+    <div class="modal-title" id="supplierModalTitle">Add Supplier</div>
+    <input type="hidden" id="editSupplierId">
+    <div class="form-group">
+      <label>Supplier Name</label>
+      <input type="text" id="sName" placeholder="e.g. Global Foods Ltd.">
+      <div class="field-error" id="sNameErr"></div>
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="sEmail" placeholder="contact@supplier.com">
+      <div class="field-error" id="sEmailErr"></div>
+    </div>
+    <div class="form-group">
+      <label>Phone</label>
+      <input type="text" id="sPhone" placeholder="+1 234 567 8900">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('supplierModal')">Cancel</button>
+      <button class="btn-primary-custom" onclick="saveSupplier()">Save Supplier</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box" style="width:360px">
+    <div class="modal-title">Confirm Delete</div>
+    <div id="confirmMsg" style="color:var(--muted);font-size:14px;line-height:1.6"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('confirmModal')">Cancel</button>
+      <button class="btn-delete" id="confirmBtn" style="padding:8px 16px;font-size:13px">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ── COMMIT 2 START ──
+// Load database from LocalStorage if available, otherwise launch default array structure
+const savedDb = localStorage.getItem('ims_db');
+const db = savedDb ? JSON.parse(savedDb) : {
+  users: [
+    { _id: 'u1', username: 'admin',    password: 'admin123', role: 'admin',    failedAttempts: 0, locked: false },
+    { _id: 'u2', username: 'employee', password: 'emp123',   role: 'employee', failedAttempts: 0, locked: false }
+  ],
+  products: [
+    { _id: 'p1', name: 'Basmati Rice',    category: 'Grains & Cereals', quantity: 45, low_stock_threshold: 20, supplier_id: 's1' },
+    { _id: 'p2', name: 'Whole Milk',       category: 'Dairy',            quantity: 8,  low_stock_threshold: 15, supplier_id: 's2' },
+    { _id: 'p3', name: 'Green Tea',        category: 'Beverages',        quantity: 60, low_stock_threshold: 10, supplier_id: 's1' },
+    { _id: 'p4', name: 'Potato Chips',     category: 'Snacks',           quantity: 5,  low_stock_threshold: 12, supplier_id: 's3' },
+    { _id: 'p5', name: 'Floor Cleaner',    category: 'Cleaning',         quantity: 30, low_stock_threshold: 8,  supplier_id: 's3' },
+    { _id: 'p6', name: 'AA Batteries',     category: 'Electronics',      quantity: 3,  low_stock_threshold: 10, supplier_id: null  },
+  ],
+  suppliers: [
+    { _id: 's1', name: 'Global Foods Ltd.', email: 'orders@globalfoods.com', phone: '+1 800 555 0101' },
+    { _id: 's2', name: 'Fresh Dairy Co.',   email: 'supply@freshdairy.com',  phone: '+1 800 555 0202' },
+    { _id: 's3', name: 'ProDist Group',     email: 'promo@prodist.net',      phone: '+1 800 555 0303' },
+  ],
+  alerts: []
+};
+
+function saveToLocalStorage() {
+  localStorage.setItem('ims_db', JSON.stringify(db));
+}
+// ── COMMIT 2 END ──
+
+// Pre-create alerts for existing low-stock
+if (!savedDb) {
+  db.products.forEach(p => {
+    if (p.quantity < p.low_stock_threshold) {
+      db.alerts.push({ _id: generateId(), product_id: p._id, triggered_at: new Date().toISOString(), is_resolved: false });
+    }
+  });
+}
+
+// ═══════════════ STATE ═══════════════
+let currentUser = null;
+let stockChartInst = null;
+let donutChartInst = null;
+let sessionTimeout = null;
+
+// ═══════════════ UTILS ═══════════════
+function generateId() { return 'id_' + Math.random().toString(36).slice(2, 10); }
+
+function toast(msg, type = 'success') {
+  const c = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = `toast-msg ${type}`;
+  el.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> ${msg}`;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function openModal(id)  { document.getElementById(id).classList.add('show'); }
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('show'); });
+});
+
+// ═══════════════ AUTH — FR-01: Secure Login, FR-07: User Roles ═══════════════
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  const user = db.users.find(x => x.username === u);
+
+  // Account lockout after 5 failed attempts
+  if (user && user.locked) {
+    errEl.textContent = '🔒 Account locked after 5 failed attempts. Contact admin.';
+    errEl.style.display = 'block'; return;
+  }
+
+  if (!user || user.password !== p) {
+    if (user) {
+      user.failedAttempts = (user.failedAttempts || 0) + 1;
+      if (user.failedAttempts >= 5) { user.locked = true; if(typeof saveToLocalStorage === 'function') saveToLocalStorage(); }
+    }
+    errEl.textContent = 'Invalid credentials. Please try again.';
+    errEl.style.display = 'block'; return;
+  }
+
+  // Success — reset failed attempts
+  user.failedAttempts = 0;
+  currentUser = user;
+
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('sidebarUsername').textContent = user.username;
+  document.getElementById('sidebarRole').textContent = user.role.toUpperCase();
+  document.getElementById('dashRolePill').textContent = user.role;
+  document.getElementById('dashRolePill').className = 'role-pill' + (user.role === 'employee' ? ' employee' : '');
+
+  // Session timeout 30 min — NFR: Security
+  resetSessionTimeout();
+
+  showPage('dashboard');
+  updateAlertBadge();
+}
+
+function doLogout() {
+  currentUser = null;
+  clearTimeout(sessionTimeout);
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginError').style.display = 'none';
+}
+
+function resetSessionTimeout() {
+  clearTimeout(sessionTimeout);
+  sessionTimeout = setTimeout(() => {
+    toast('Session expired due to inactivity.', 'error');
+    setTimeout(doLogout, 2000);
+  }, 30 * 60 * 1000);
+}
+document.addEventListener('mousemove', () => { if (currentUser) resetSessionTimeout(); });
+document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+// ═══════════════ NAVIGATION ═══════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'inventory') { renderInventoryTable(); applyRoleRestrictions(); }
+  if (name === 'suppliers') { renderSuppliersTable(); applyRoleRestrictions(); }
+  if (name === 'alerts')    renderAlerts();
+  if (name === 'admin')      renderAdmin();
+}
+
+// FR-07: Role-based access
+function applyRoleRestrictions() {
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  ['btnAddProduct', 'btnAddSupplier'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isAdmin ? 'inline-block' : 'none';
+  });
+}
+
+// ═══════════════ DASHBOARD — FR-06: Inventory Dashboard ═══════════════
+function renderDashboard() {
+  const lowStock = db.products.filter(p => p.quantity < p.low_stock_threshold);
+  document.getElementById('statTotal').textContent     = db.products.length;
+  document.getElementById('statLow').textContent       = lowStock.length;
+  document.getElementById('statSuppliers').textContent = db.suppliers.length;
+
+  renderStockChart();
+  renderDonutChart();
+}
+
+function renderStockChart() {
+  const ctx = document.getElementById('stockChart').getContext('2d');
+  if (stockChartInst) stockChartInst.destroy();
+
+  const labels = db.products.map(p => p.name);
+  const quantities = db.products.map(p => p.quantity);
+  const thresholds = db.products.map(p => p.low_stock_threshold);
+  const colors = db.products.map(p => p.quantity < p.low_stock_threshold ? 'rgba(255,107,107,0.8)' : 'rgba(0,229,160,0.7)');
+
+  stockChartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Quantity', data: quantities, backgroundColor: colors, borderRadius: 6, borderSkipped: false },
+        { label: 'Threshold', data: thresholds, type: 'line', borderColor: 'rgba(255,201,74,0.8)', borderDash: [6,4], borderWidth: 2, pointRadius: 0, fill: false }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { labels: { color: '#6b7280', font: { size: 11 } } } },
+      scales: {
+        x: { ticks: { color: '#6b7280', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        y: { ticks: { color: '#6b7280', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+function renderDonutChart() {
+  const ctx = document.getElementById('donutChart').getContext('2d');
+  if (donutChartInst) donutChartInst.destroy();
+
+  const low = db.products.filter(p => p.quantity < p.low_stock_threshold).length;
+  const ok  = db.products.length - low;
+
+  donutChartInst = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['OK', 'Low Stock'],
+      datasets: [{ data: [ok, low], backgroundColor: ['rgba(0,229,160,0.7)', 'rgba(255,107,107,0.7)'], borderWidth: 0, hoverOffset: 8 }]
+    },
+    options: {
+      responsive: true,
+      cutout: '70%',
+      plugins: { legend: { labels: { color: '#6b7280', font: { size: 12 } } } }
+    }
+  });
+}
+
+// ── COMMIT 1 START ──
+// FR-04: Product Search and Dynamic Row Generation Structure
+function renderInventoryTable() {
+  const query = (document.getElementById('searchInput').value || '').toLowerCase();
+  const filtered = db.products.filter(p =>
+    p.name.toLowerCase().includes(query) ||
+    p.category.toLowerCase().includes(query)
+  );
+
+  const body = document.getElementById('inventoryBody');
+  body.innerHTML = '';
+
+  if (filtered.length === 0) {
+    body.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">No products found</td></tr>`;
+    return;
+  }
+
+  filtered.forEach(p => {
+    const isLow = p.quantity < p.low_stock_threshold;
+    const supplier = db.suppliers.find(s => s._id === p.supplier_id);
+    const supplierName = supplier ? supplier.name : 'None';
+    const isAdmin = currentUser && currentUser.role === 'admin';
+
+    const tr = document.createElement('tr');
+    if (isLow) tr.className = 'low-stock';
+
+    tr.innerHTML = `
+      <td><strong>${p.name}</strong></td>
+      <td><span class="badge-cat">${p.category}</span></td>
+      <td><strong class="${isLow ? 'text-danger' : ''}">${p.quantity}</strong></td>
+      <td>${p.low_stock_threshold}</td>
+      <td><span class="${isLow ? 'badge-low' : 'badge-ok'}">${isLow ? 'Low Stock' : 'OK'}</span></td>
+      <td>${supplierName}</td>
+      <td>
+        <button class="btn-edit" onclick="openEditProduct('${p._id}')" ${isAdmin ? '' : 'disabled'}>✏️</button>
+        <button class="btn-delete" onclick="openEditProduct('${p._id}')" ${isAdmin ? '' : 'disabled'}>🗑️</button>
+      </td>
+    `;
+    body.appendChild(tr);
+  });
+}
+// ── COMMIT 1 END ──
+
+function renderSuppliersTable() {
+  const body = document.getElementById('suppliersBody');
+  body.innerHTML = '';
+  const isAdmin = currentUser && currentUser.role === 'admin';
+
+  db.suppliers.forEach(s => {
+    const prodCount = db.products.filter(p => p.supplier_id === s._id).length;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${s.name}</strong></td>
+      <td>${s.email}</td>
+      <td>${s.phone || '-'}</td>
+      <td><span class="badge-cat">${prodCount} items</span></td>
+      <td>
+        <button class="btn-edit" ${isAdmin ? '' : 'disabled'}>✏️</button>
+      </td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+function renderAlerts() {
+  const container = document.getElementById('alertsList');
+  const activeAlerts = db.alerts.filter(a => !a.is_resolved);
+
+  if (activeAlerts.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🛡️</div>
+        <div class="empty-text">All stock levels are healthy. No unresolved alerts.</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = '';
+  activeAlerts.forEach(a => {
+    const prod = db.products.find(p => p._id === a.product_id);
+    if (!prod) return;
+    const div = document.createElement('div');
+    div.className = 'alert-item';
+    div.innerHTML = `
+      <div class="alert-icon">⚠️</div>
+      <div>
+        <div class="alert-product">${prod.name} is running critically low!</div>
+        <div class="alert-detail">Current stock: ${prod.quantity} units (Threshold: ${prod.low_stock_threshold})</div>
+      </div>
+      <div class="alert-time">${new Date(a.triggered_at).toLocaleTimeString()}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function updateAlertBadge() {
+  const count = db.alerts.filter(a => !a.is_resolved).length;
+  const b = document.getElementById('alertBadge');
+  if (count > 0) {
+    b.textContent = count; b.style.display = 'inline-block';
+  } else {
+    b.style.display = 'none';
+  }
+}
+
+// ── COMMIT 3 START ──
+// FR-07: Admin Panel Operations & Authorization Layout Structure
+function renderAdmin() {
+  const container = document.getElementById('adminContent');
+  
+  if (currentUser && currentUser.role !== 'admin') {
+    container.innerHTML = `
+      <div class="access-denied">
+        <div class="icon">🚫</div>
+        <h4>Access Denied</h4>
+        <p>You do not have administrative privileges to view this control panel.</p>
+      </div>`;
+    return;
+  }
+
+  let html = `
+    <div class="table-card">
+      <div class="table-header"><div class="table-title">System Users</div></div>
+      <table>
+        <thead>
+          <tr><th>Username</th><th>Role</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+  `;
+
+  db.users.forEach(u => {
+    html += `
+      <tr>
+        <td><strong>${u.username}</strong></td>
+        <td><span class="badge-cat">${u.role.toUpperCase()}</span></td>
+        <td><span class="${u.locked ? 'text-danger' : 'text-success'}">${u.locked ? '🔒 Locked' : '✅ Active'}</span></td>
+        <td>
+          ${u.locked ? `<button class="btn-resolve" onclick="unlockUser('${u._id}')">Unlock Account</button>` : `<span class="text-muted">No actions required</span>`}
+        </td>
+      </tr>
+    `;
+  });
+
+  html += `</tbody></table></div>`;
+  container.innerHTML = html;
+}
+
+function unlockUser(userId) {
+  const user = db.users.find(x => x._id === userId);
+  if (user) {
+    user.locked = false;
+    user.failedAttempts = 0;
+    toast(`Account '${user.username}' successfully unlocked.`);
+    if (typeof saveToLocalStorage === 'function') saveToLocalStorage();
+    renderAdmin();
+  }
+}
+// ── COMMIT 3 END ──
+
+</script>
+</body>
+</html>
